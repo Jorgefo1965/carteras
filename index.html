@@ -620,7 +620,8 @@ async function initApp(){
 function uid(){ return 'c' + Date.now() + Math.random().toString(36).slice(2,7); }
 
 function uniqueValues(key){
-  return [...new Set(items.map(i => i[key]).filter(Boolean))].sort();
+  return [...new Set(items.map(i => i[key]).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es', { numeric: true, sensitivity: 'base' }));
 }
 
 function renderFilters(){
@@ -804,7 +805,9 @@ const FIELD_LABELS = { box: '+ Crear nueva caja', color: '+ Crear nuevo color', 
 function populateSelectOptions(key, selectId){
   const sel = document.getElementById(selectId);
   const predefined = PREDEFINED[key];
-  const custom = uniqueValues(key).filter(v => !predefined.includes(v));
+  const norm = v => v.trim().toLowerCase();
+  const predefinedNorm = predefined.map(norm);
+  const custom = uniqueValues(key).filter(v => !predefinedNorm.includes(norm(v)));
   sel.innerHTML = '<option value="">Sin especificar</option>' +
     predefined.map(v => `<option>${v}</option>`).join('') +
     (custom.length ? custom.map(v => `<option>${v}</option>`).join('') : '') +
