@@ -753,10 +753,12 @@ function openDetail(id){
     tagsRow.appendChild(tag);
   });
   document.getElementById('detailOverlay').classList.add('open');
+  history.pushState({ modal: 'detail' }, '');
 }
-function closeDetail(){
+function closeDetail(fromPopstate){
   document.getElementById('detailOverlay').classList.remove('open');
   currentDetailId = null;
+  if(!fromPopstate) history.back();
 }
 
 document.getElementById('closeDetailBtn').onclick = closeDetail;
@@ -789,7 +791,8 @@ document.getElementById('deleteBtn').onclick = async () => {
 document.getElementById('editBtn').onclick = () => {
   const item = items.find(i => i.id === currentDetailId);
   if(!item) return;
-  closeDetail();
+  document.getElementById('detailOverlay').classList.remove('open');
+  currentDetailId = null;
   openForm(item);
 };
 
@@ -852,13 +855,15 @@ function openForm(item){
   updatePreview();
   updateSaveState();
   document.getElementById('formOverlay').classList.add('open');
+  history.pushState({ modal: 'form' }, '');
 }
-function closeForm(){
+function closeForm(fromPopstate){
   document.getElementById('formOverlay').classList.remove('open');
   document.getElementById('cameraInput').value = '';
   document.getElementById('galleryInput').value = '';
   editingId = null;
   currentPhotoData = null;
+  if(!fromPopstate) history.back();
 }
 
 function updatePreview(){
@@ -1079,6 +1084,17 @@ document.getElementById('importFileInput').addEventListener('change', e => {
     document.getElementById('importFileInput').value = '';
   };
   reader.readAsText(file);
+});
+
+// Botón Atrás de Android/navegador: cierra el modal abierto en vez de salir de la app
+window.addEventListener('popstate', () => {
+  if(document.getElementById('formOverlay').classList.contains('open')){
+    closeForm(true);
+  } else if(document.getElementById('detailOverlay').classList.contains('open')){
+    closeDetail(true);
+  } else if(document.getElementById('menuDropdown').classList.contains('open')){
+    document.getElementById('menuDropdown').classList.remove('open');
+  }
 });
 
 // Init
